@@ -1,4 +1,4 @@
-# Multi-Echelon Inventory Risk Intelligence & Optimization
+# Multi-Echelon Inventory Risk Intelligence & Optimization - [StockS8 AI](https://stocks8ai.streamlit.app/)
 
 Harborfield Consumer Goods is a fictional US manufacturer with five regional distribution centers. This project reconstructs how local stockouts occur despite inventory elsewhere in the network, identifies the exposure in SQL, predicts shortages 14 days ahead, and tests inventory decisions under matched demand and disruption scenarios.
 
