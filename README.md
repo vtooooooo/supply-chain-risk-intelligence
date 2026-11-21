@@ -84,6 +84,17 @@ docker run --rm -p 8501:8501 harborfield
 
 The image generates its own full artifact set and serves Streamlit on port 8501. In a managed network with a trusted organization CA, the build can receive the bundle via `docker build --secret id=build_ca,src=/path/to/ca-bundle.pem -t harborfield .`. The mount is scoped to dependency installation. GitHub Actions runs the reduced pipeline, notebooks and tests on pushes and pull requests.
 
+## Streamlit Community Cloud
+
+1. In [Streamlit Community Cloud](https://share.streamlit.io/), connect GitHub and choose **Create app**.
+2. Select repository `vtooooooo/supply-chain-risk-intelligence`, branch `main` after merging the deployment PR, and main file path `app/Home.py`. To preview the PR first, select its branch.
+3. Under **Advanced settings**, select **Python 3.12**, then choose **Deploy**. The repository-root `requirements.txt` installs the app dependencies, and `packages.txt` installs the OpenMP runtime for LightGBM. This synthetic demo requires no app secrets or external storage.
+4. Open the assigned URL after deployment. Check all eight sidebar views and submit a run in **Scenario simulator**.
+
+A fresh checkout uses the versioned `deployment/snapshot/` by default. It contains the full-run dashboard CSVs, a read-only DuckDB projection of the required tables, the 72,000 held-out predictions with the columns used by the app, and the trained model. The 21 matched experiments and six policy-control rows are copied from the validated run. Startup reads local files, and the scenario view runs the existing 28-day replay on demand. Local developers can use a complete `artifacts/` directory or set `HARBORFIELD_ARTIFACTS` explicitly.
+
+To refresh the snapshot after an intentional full pipeline update, run `python -m scripts.run` and then `python -m scripts.package_app` from the repository root. Include the refreshed snapshot in the same PR as the results. The exporter requires the full default run.
+
 ## Limitations
 
 The fictional network uses single sourcing, unit-based capacity, lost rather than deferred demand, and no pallet or truck constraints. Three replay seeds provide descriptive ranges. The short replay and absence of a terminal pipeline valuation affect economic comparisons. The heuristic uses a donor service buffer and does not enforce a network-wide fill-rate target. A real deployment needs reconciled commercial data, variable item dimensions, audited costs, service constraints and a shadow pilot with a working-capital budget.

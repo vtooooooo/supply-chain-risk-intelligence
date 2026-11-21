@@ -17,3 +17,7 @@ jobs:
       - run: python -m scripts.run --quick --output artifacts/quick
       - run: python -m scripts.analyze --quick
       - run: pytest -q
+      - name: Check all views against the deployment snapshot
+        env:
+          HARBORFIELD_ARTIFACTS: deployment/snapshot
+        run: pytest -q -k test_app_views
