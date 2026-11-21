@@ -1,5 +1,6 @@
 """Streamlit decision support using generated operational artifacts."""
 import os
+import sys
 from pathlib import Path
 
 import duckdb
@@ -8,11 +9,23 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+# Community Cloud runs this entry point without installing the local project package.
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from src.app_data import PREDICTION_COLUMNS, missing_files
 from src.experiment import kpis, replay
 from src.operations import Scenario
 
-ROOT = Path(__file__).resolve().parents[1]
-DATA = Path(os.environ.get("HARBORFIELD_ARTIFACTS", ROOT/"artifacts"))
+override = os.environ.get("HARBORFIELD_ARTIFACTS")
+local_artifacts = ROOT/"artifacts"
+if override:
+    DATA = Path(override)
+elif not missing_files(local_artifacts):
+    DATA = local_artifacts
+else:
+    DATA = ROOT/"deployment"/"snapshot"
 st.set_page_config(page_title="Harborfield | Inventory Intelligence", page_icon="📦", layout="wide")
 st.sidebar.title("Harborfield")
 st.sidebar.caption("Synthetic US distribution network")
@@ -21,8 +34,9 @@ PAGES = ["Executive overview", "Inventory diagnostics", "Supplier performance", 
 page = st.sidebar.radio("View", PAGES)
 st.title(page)
 
-if not (DATA/"experiment.csv").exists():
-    st.error("Generate operational and model artifacts before opening the app.")
+missing = missing_files(DATA)
+if missing:
+    st.error(f"App data is incomplete. Missing files: {', '.join(missing)}.")
     st.code("python -m scripts.run")
     st.stop()
 
@@ -48,7 +62,7 @@ def sql(statement):
 
 @st.cache_data
 def predictions(version):
-    return pd.read_parquet(DATA/"predictions.parquet", columns=["date","site","sku","category","risk","alert","target"])
+    return pd.read_parquet(DATA/"predictions.parquet", columns=PREDICTION_COLUMNS)
 
 
 def table(data, name):
