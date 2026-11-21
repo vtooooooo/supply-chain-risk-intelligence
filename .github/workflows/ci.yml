@@ -1,0 +1,19 @@
+name: Verification
+on: [push, pull_request]
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    env:
+      OPENBLAS_NUM_THREADS: 2
+      OMP_NUM_THREADS: 2
+      HARBORFIELD_ARTIFACTS: artifacts/quick
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: python -m pip install -e '.[dev]'
+      - run: python -m scripts.run --quick --output artifacts/quick
+      - run: python -m scripts.analyze --quick
+      - run: pytest -q
